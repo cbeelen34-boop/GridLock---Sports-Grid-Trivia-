@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gridiron — NFL Grid Night</title>
+<style>
+:root{--bg:#0b1118;--panel:#121c27;--panel2:#172432;--line:#2a3b4c;--text:#edf4f8;--muted:#91a4b5;--green:#b8f36b;--green2:#233d27;--blue:#83c9ff;--red:#ff8c8c;--gold:#f4c96b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#1b2d3a 0,transparent 36%),var(--bg);color:var(--text);font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer;border:0;font-weight:750;border-radius:11px;padding:11px 15px;transition:.15s}button:hover{transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.primary{background:var(--green);color:#102012}.secondary{background:#26394a;color:var(--text);border:1px solid #344b60}.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.wrap{max-width:1200px;margin:auto;padding:26px 22px 40px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:30px}.brand{display:flex;align-items:center;gap:11px;font-weight:900;font-size:21px;letter-spacing:-.7px}.logo{width:38px;height:38px;border-radius:12px;background:var(--green);display:grid;place-items:center;color:#142014;font-size:22px;font-weight:1000}.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #365344;background:#14251e;color:var(--green);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800}.dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;margin-bottom:28px}.eyebrow{color:var(--green);font-size:12px;letter-spacing:1.8px;text-transform:uppercase;font-weight:900}.hero h1{font-size:clamp(36px,5vw,60px);letter-spacing:-2.7px;line-height:1.02;margin:13px 0}.hero p{color:var(--muted);max-width:590px;font-size:16px}.hero-card{border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#192b38,#101922);padding:20px;box-shadow:0 18px 50px #0003}.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}.mini-grid div{aspect-ratio:1;border-radius:9px;border:1px solid #385062;background:#172a37;display:grid;place-items:center;font-size:22px;font-weight:900;color:var(--green)}.mini-grid div:nth-child(2),.mini-grid div:nth-child(6){color:var(--blue)}.mini-grid div:nth-child(4){color:var(--gold)}
+.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:20px}.panel{border:1px solid var(--line);background:rgba(18,28,39,.94);border-radius:18px;padding:20px;min-width:0}.panel h2{font-size:17px;margin:0 0 4px;letter-spacing:-.3px}.sub{font-size:13px;color:var(--muted);margin:0 0 18px}.field{display:block;margin:14px 0}.field span{display:block;color:#bac8d3;font-size:12px;font-weight:800;margin-bottom:7px}.field input:not([type=checkbox]),.field select,.answer-input{width:100%;background:#0c151e;border:1px solid #304355;color:var(--text);border-radius:10px;padding:11px 12px;outline:none}.field input:not([type=checkbox]):focus,.field select:focus,.answer-input:focus{border-color:var(--green)}.catlist{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cat{display:flex;align-items:center;gap:8px;border:1px solid #2d4051;background:#0e1822;border-radius:10px;padding:9px 10px;font-size:12px;line-height:1.25;color:#d2dce4;cursor:pointer;min-width:0;transition:border-color .15s,background .15s}.cat:hover{border-color:#3d566b}.cat input{flex:none;width:16px;height:16px;margin:0;accent-color:var(--green);cursor:pointer}.cat:has(input:checked){border-color:#4e7a45;background:#14251e;color:var(--text)}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.divider{height:1px;background:var(--line);margin:18px 0}.hint{font-size:12px;color:var(--muted);line-height:1.5}.game-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:18px}.roomcode{font-size:12px;color:var(--muted)}.roomcode strong{color:var(--green);font-size:17px;letter-spacing:2px;margin-left:5px}.players{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.player{display:flex;align-items:center;gap:7px;background:#1a2a38;border:1px solid #2b4051;padding:6px 9px;border-radius:999px;font-size:12px}.avatar{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;background:#294c3a;color:var(--green);font-weight:900;font-size:10px}.score{font-weight:900;color:var(--green)}.boardwrap{overflow:auto;padding-bottom:4px}.board{display:grid;grid-template-columns:repeat(4,minmax(105px,1fr));gap:7px;min-width:470px}.cell{min-height:114px;border-radius:12px;border:1px solid #304659;background:#111e29;padding:10px;display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;text-align:center;white-space:normal;color:var(--text)}.cell.head{min-height:78px;background:#1d3040;border-color:#3b5366;color:#dce8f0;font-size:12px;justify-content:center}.cell.corner{background:transparent;border:0;min-height:78px}.cell .cell-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}.cell .answer{font-size:13px;font-weight:800;overflow-wrap:anywhere}.cell .mark{font-size:11px;color:var(--green);font-weight:900}.cell.claimed{background:var(--green2);border-color:#588348}.cell.claimed .answer{color:#d9ffd1}.cell:hover:not(.head):not(.corner){border-color:var(--green)}.playbar{display:grid;grid-template-columns:1fr auto;gap:9px;margin-top:15px}.status{font-size:12px;min-height:18px;margin-top:8px;color:var(--muted)}.status.good{color:var(--green)}.status.bad{color:var(--red)}.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}.rule{border:1px solid var(--line);background:#101a24;border-radius:13px;padding:14px}.rule strong{display:block;font-size:13px;margin-bottom:5px}.rule span{font-size:12px;color:var(--muted)}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#142014;padding:11px 16px;border-radius:12px;font-weight:850;box-shadow:0 8px 30px #0006;display:none;z-index:4}.note{font-size:11px;color:#7f94a6;margin-top:15px}.smallbtn{padding:8px 10px;font-size:12px}.tag{font-size:10px;border:1px solid #365344;border-radius:6px;padding:3px 6px;color:var(--green);font-weight:900}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.hero-card{display:none}.layout{grid-template-columns:1fr}.top{margin-bottom:22px}.rules{grid-template-columns:1fr}.panel{padding:16px}}@media(max-width:450px){.wrap{padding:16px 12px}.top .pill{display:none}.hero h1{letter-spacing:-1.6px}.game-head{flex-direction:column}.board{grid-template-columns:repeat(4,minmax(90px,1fr));min-width:390px}.cell{min-height:100px;padding:7px}.playbar{grid-template-columns:1fr}.playbar button{width:100%}}
+.lobby{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(6,10,15,.82);backdrop-filter:blur(6px)}.lobby-card{width:100%;max-width:400px;border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:24px}.lobby-card h2{margin:8px 0 4px;font-size:22px;letter-spacing:-.5px}.lobby-card input{width:100%}.lobby-actions{display:flex;gap:10px;margin-top:18px}.lobby-actions button{flex:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div class="brand"><div class="logo">G</div> GRIDIRON <span style="color:var(--muted);font-weight:600">/ GRID NIGHT</span></div><div class="pill"><span class="dot"></span> PLAYTEST BUILD</div></header>
+  <section class="hero">
+    <div><div class="eyebrow">Sports knowledge. Friendly competition.</div><h1>Your grid.<br><span style="color:var(--green)">Your rules.</span></h1><p>Build a custom NFL trivia grid, invite the group with a room code, and let the board keep score. No more whiteboard math.</p><div class="row" style="justify-content:flex-start;flex-wrap:wrap;margin-top:18px"><button class="primary" id="startBtn">Start a game ↗</button><button class="secondary" id="copyTop">Copy invite link</button></div></div>
+    <div class="hero-card"><div class="row"><span class="eyebrow">THE GAME BOARD</span><span class="tag">4 × 4 DEMO</span></div><div class="mini-grid"><div>×</div><div>○</div><div>×</div><div>○</div><div>×</div><div>×</div><div>○</div><div>×</div><div>○</div></div><p class="hint" style="margin:12px 0 0">Pick a square, prove the overlap, claim the spot. First to connect four wins.</p></div>
+  </section>
+  <main class="layout" id="app">
+    <aside class="panel" id="builder">
+      <h2>Game setup</h2><p class="sub">Make this grid yours.</p>
+      <label class="field"><span>ROOM NAME</span><input id="roomName" value="Sunday Showdown" maxlength="40"></label>
+      <label class="field"><span>YOUR NICKNAME</span><input id="nickname" value="Commissioner" maxlength="20"></label>
+      <label class="field"><span>GRID FORMAT</span><select id="gridSize"><option value="3">3 × 3 · Quick round</option><option value="4" selected>4 × 4 · Connect four</option></select></label>
+      <div class="field"><span>AVAILABLE CATEGORY TYPES</span><div class="catlist" id="categoryList">
+        <label class="cat"><input type="checkbox" value="MVP" checked> NFL MVP</label>
+        <label class="cat"><input type="checkbox" value="First-round pick" checked> 1st-round pick</label>
+        <label class="cat"><input type="checkbox" value="Alabama" checked> Alabama</label>
+        <label class="cat"><input type="checkbox" value="Patriots" checked> Patriots</label>
+        <label class="cat"><input type="checkbox" value="Packers" checked> Packers</label>
+        <label class="cat"><input type="checkbox" value="Chiefs" checked> Chiefs</label>
+        <label class="cat"><input type="checkbox" value="Super Bowl MVP"> Super Bowl MVP</label>
+        <label class="cat"><input type="checkbox" value="Michigan"> Michigan</label>
+        <label class="cat"><input type="checkbox" value="Heisman winner"> Heisman winner</label>
+        <label class="cat"><input type="checkbox" value="Pro Bowler"> Pro Bowler</label>
+      </div></div>
+      <div class="divider"></div>
+      <div class="row"><div><strong style="font-size:13px">Round rules</strong><div class="hint">One answer per square</div></div><label class="cat"><input id="unique" type="checkbox" checked> Unique answers</label></div>
+      <label class="field"><span>WIN CONDITION</span><select id="winCondition"><option value="connect">Connect 4 (line of 4)</option><option value="most">Most squares when time ends</option><option value="tic">Tic-tac-toe (line of 3)</option></select></label>
+      <button class="primary" id="generate" style="width:100%">Generate grid</button>
+      <p class="note">Prototype data is a small hand-curated sample. This build demonstrates the flow; it is not yet a comprehensive or independently verified NFL database.</p>
+    </aside>
+    <section class="panel">
+      <div class="game-head"><div><div class="eyebrow" id="gameMode">LOBBY OPEN · NFL</div><h2 id="displayRoom" style="font-size:23px;margin-top:5px">Sunday Showdown</h2><div class="roomcode">ROOM CODE <strong id="roomCode">GRID24</strong> <button class="ghost smallbtn" id="copyCode">Copy</button></div><div class="players" id="players"></div></div><div style="text-align:right"><div class="hint">YOUR SCORE</div><div class="score" style="font-size:30px" id="score">0</div><button class="secondary smallbtn" id="addPlayer" style="margin-top:8px">＋ Add demo player</button></div></div>
+      <div class="row" style="margin-bottom:10px"><strong style="font-size:13px">NFL KNOWLEDGE GRID</strong><span class="tag" id="gridLabel">4 × 4</span></div>
+      <div class="boardwrap"><div class="board" id="board"></div></div>
+      <div class="playbar"><input class="answer-input" id="answerInput" placeholder="Type an NFL player's name…" autocomplete="off"><button class="primary" id="submitAnswer">Submit answer</button></div>
+      <div class="status" id="status" aria-live="polite">Choose a square, then enter a player who matches both categories.</div>
+      <div class="divider"></div>
+      <div class="row"><strong style="font-size:13px">ROUND ACTIVITY</strong><button class="ghost smallbtn" id="reset">Reset board</button></div>
+      <div id="activity" class="hint" style="margin-top:10px">The room is ready. Share the code with your group to get started.</div>
+    </section>
+  </main>
+  <section class="rules">
+    <div class="rule"><strong>01 / Build</strong><span>Choose NFL categories and create a grid that fits your group's knowledge.</span></div>
+    <div class="rule"><strong>02 / Claim</strong><span>Enter a player who matches both intersecting criteria. Correct answers claim squares.</span></div>
+    <div class="rule"><strong>03 / Connect</strong><span>Race to connect a line, or play a casual round and compare scores.</span></div>
+  </section>
+  <p class="note">Gridiron prototype · Rooms and player lists are shared online. Square claims are still tracked on each player's own device.</p>
+</div>
+<div class="toast" id="toast"></div>
+<div class="lobby" id="lobbyScreen" role="dialog" aria-modal="true" aria-labelledby="lobbyTitle">
+  <div class="lobby-card">
+    <div class="eyebrow">GRIDIRON LOBBY</div>
+    <h2 id="lobbyTitle">Join the lobby</h2>
+    <p class="sub" id="lobbyMessage" aria-live="polite">Enter a room code or create a new game.</p>
+    <label class="field"><span>YOUR NICKNAME</span><input id="lobbyNickname" maxlength="20" autocomplete="nickname"></label>
+    <label class="field"><span>ROOM CODE</span><input id="accessCode" maxlength="12" style="text-transform:uppercase"></label>
+    <div class="lobby-actions"><button class="primary" id="joinLobby">Join room</button><button class="secondary" id="createLobby">Create game</button></div>
+  </div>
+</div>
+<script>
+const athletes = [
+{name:"Tom Brady",aliases:["tom brady","brady"],mvp:true,first:false,alabama:false,patriots:true,packers:false,chiefs:false,sb:true,michigan:true,heisman:false,pro:true},
+{name:"Patrick Mahomes",aliases:["patrick mahomes","mahomes"],mvp:true,first:true,alabama:false,patriots:false,packers:false,chiefs:true,sb:true,michigan:false,heisman:false,pro:true},
+{name:"Aaron Rodgers",aliases:["aaron rodgers","rodgers"],mvp:true,first:true,alabama:false,patriots:false,packers:true,chiefs:false,sb:true,michigan:false,heisman:false,pro:true},
+{name:"Derrick Henry",aliases:["derrick henry"],mvp:false,first:false,alabama:true,patriots:false,packers:false,chiefs:false,sb:false,michigan:false,heisman:true,pro:true},
+{name:"Tyreek Hill",aliases:["tyreek hill"],mvp:false,first:false,alabama:false,patriots:false,packers:false,chiefs:true,sb:false,michigan:false,heisman:false,pro:true},
+{name:"Jalen Hurts",aliases:["jalen hurts"],mvp:false,first:true,alabama:true,patriots:false,packers:false,chiefs:false,sb:false,michigan:false,heisman:false,pro:true},
+{name:"Tua Tagovailoa",aliases:["tua tagovailoa","tua"],mvp:false,first:true,alabama:true,patriots:false,packers:false,chiefs:false,sb:false,michigan:false,heisman:false,pro:true},
+{name:"Clay Matthews",aliases:["clay matthews"],mvp:false,first:true,alabama:false,patriots:false,packers:true,chiefs:false,sb:true,michigan:false,heisman:false,pro:true},
+{name:"Brett Favre",aliases:["brett favre","favre"],mvp:true,first:false,alabama:false,patriots:false,packers:true,chiefs:false,sb:true,michigan:false,heisman:false,pro:true},
+{name:"Joe Namath",aliases:["joe namath","namath"],mvp:false,first:true,alabama:false,patriots:false,packers:false,chiefs:false,sb:true,michigan:false,heisman:false,pro:true},
+{name:"Joe Burrow",aliases:["joe burrow","burrow"],mvp:false,first:true,alabama:false,patriots:false,packers:false,chiefs:false,sb:false,michigan:false,heisman:true,pro:true},
+{name:"Calvin Johnson",aliases:["calvin johnson","megatr on","megaton"],mvp:false,first:true,alabama:false,patriots:false,packers:false,chiefs:false,sb:false,michigan:false,heisman:false,pro:true},
+{name:"Terry Bradshaw",aliases:["terry bradshaw","bradshaw"],mvp:false,first:true,alabama:false,patriots:false,packers:false,chiefs:false,sb:true,michigan:false,heisman:false,pro:true},
+{name:"Lamar Jackson",aliases:["lamar jackson"],mvp:true,first:true,alabama:false,patriots:false,packers:false,chiefs:false,sb:false,michigan:false,heisman:true,pro:true},
+{name:"Cam Newton",aliases:["cam newton","newton"],mvp:true,first:true,alabama:false,patriots:true,packers:false,chiefs:false,sb:false,michigan:false,heisman:true,pro:true},
+{name:"Julio Jones",aliases:["julio jones"],mvp:false,first:true,alabama:true,patriots:false,packers:false,chiefs:false,sb:false,michigan:false,heisman:false,pro:true},
+{name:"Drew Brees",aliases:["drew brees","brees"],mvp:false,first:false,alabama:false,patriots:false,packers:false,chiefs:false,sb:true,michigan:false,heisman:false,pro:true},
+{name:"Travis Kelce",aliases:["travis kelce","kelce"],mvp:false,first:false,alabama:false,patriots:false,packers:false,chiefs:true,sb:true,michigan:false,heisman:false,pro:true},
+{name:"Nick Saban",aliases:["nick saban"],mvp:false,first:false,alabama:true,patriots:false,packers:false,chiefs:false,sb:false,michigan:false,heisman:false,pro:false}
+];
+const labels={"MVP":"NFL MVP","First-round pick":"1st-round pick","Alabama":"Alabama","Patriots":"Patriots","Packers":"Packers","Chiefs":"Chiefs","Super Bowl MVP":"Super Bowl MVP","Michigan":"Michigan","Heisman winner":"Heisman winner","Pro Bowler":"Pro Bowler"};
+const props={"MVP":"mvp","First-round pick":"first","Alabama":"alabama","Patriots":"patriots","Packers":"packers","Chiefs":"chiefs","Super Bowl MVP":"sb","Michigan":"michigan","Heisman winner":"heisman","Pro Bowler":"pro"};
+let size=4, rows=[], cols=[], cells=[], selected=null, score=0, players=["Commissioner"], claimedNames=new Set(), activity=[], usedUnique=true, turn=0;
+const $=id=>document.getElementById(id);
+function toast(s){$('toast').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2100)}
+function norm(s){return s.toLowerCase().replace(/[^a-z0-9]/g,'').replace(/\b(the|jr|sr|iii|iv)\b/g,'')}
+function valid(a,r,c){return !!(a[props[r]]&&a[props[c]])}
+function pool(r,c){return athletes.filter(a=>valid(a,r,c))}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function getCats(){return [...document.querySelectorAll('#categoryList input:checked')].map(x=>x.value)}
+let generate=function(){
+ size=+$('gridSize').value;let cats=getCats();
+ if(cats.length<2){toast('Select at least two category types.');return}
+ let combos=[];
+ for(let r of cats)for(let c of cats)if(r!==c&&pool(r,c).length)combos.push([r,c]);
+ let chosenRows=[],chosenCols=[];
+ // Pick a set with at least one valid candidate at each intersection.
+ for(let attempt=0;attempt<180;attempt++){
+  let mix=shuffle(cats), rr=mix.slice(0,size), cc=shuffle(cats).slice(0,size);
+  if(new Set(rr).size<size||new Set(cc).size<size)continue;
+  if(rr.some(r=>cc.includes(r))){} 
+  if(rr.every(r=>cc.every(c=>r!==c&&pool(r,c).length>0))){chosenRows=rr;chosenCols=cc;break}
+ }
+ if(!chosenRows.length){
+   // Keep the grid playable even when category choices are restrictive.
+   let best=null;
+   for(let attempt=0;attempt<250;attempt++){
+    let rr=shuffle(cats).slice(0,Math.min(size,cats.length)), cc=shuffle(cats).slice(0,Math.min(size,cats.length));
+    let validCount=rr.reduce((n,r)=>n+cc.filter(c=>c!==r&&pool(r,c).length>0).length,0);
+    if(!best||validCount>best.count)best={rr,cc,count:validCount};
+   }
+   chosenRows=best.rr;chosenCols=best.cc;
+   size=Math.min(size,chosenRows.length,chosenCols.length);
+   $('gridSize').value=String(size);
+   toast('Some combinations have no sample answer; grid reduced to valid categories.');
+ }
+ rows=chosenRows;cols=chosenCols;cells=Array.from({length:size*size},()=>({player:null,owner:null}));selected=null;score=0;claimedNames=new Set();turn=0;
+ $('score').textContent='0';$('gridLabel').textContent=size+' × '+size;$('activity').textContent='New grid generated. Choose a square to answer.';$('status').textContent='Choose a square, then enter a player who matches both categories.';$('status').className='status';renderBoard();renderPlayers();
+}
+function renderBoard(){
+ const board=$('board');board.style.gridTemplateColumns=`repeat(${size+1}, minmax(${size===4?'96px':'105px'},1fr))`;board.innerHTML='';
+ let corner=document.createElement('div');corner.className='cell corner';corner.innerHTML='<span class="tag">NFL</span>';board.append(corner);
+ cols.forEach(c=>{let el=document.createElement('div');el.className='cell head';el.textContent=labels[c]||c;board.append(el)});
+ for(let ri=0;ri<size;ri++){
+  let rh=document.createElement('div');rh.className='cell head';rh.textContent=labels[rows[ri]]||rows[ri];board.append(rh);
+  for(let ci=0;ci<size;ci++){
+   let idx=ri*size+ci, cell=cells[idx], el=document.createElement('button');el.className='cell'+(cell.player?' claimed':'')+(selected===idx?' selected':'');
+   el.innerHTML=cell.player?`<span class="cell-label">${escapeHtml(cell.owner||'Claimed')}</span><span class="answer">${escapeHtml(cell.player)}</span><span class="mark">✓ VALID ANSWER</span>`:`<span class="cell-label">SQUARE ${String(idx+1).padStart(2,'0')}</span><span class="answer">${labels[rows[ri]]} <span style="color:var(--green)">+</span><br>${labels[cols[ci]]}</span><span class="mark">${pool(rows[ri],cols[ci]).length} sample answers</span>`;
+   el.onclick=()=>{if(cell.player)return;selected=idx;renderBoard();$('status').textContent=`Selected: ${labels[rows[ri]]} + ${labels[cols[ci]]}. Enter an NFL player.`;$('status').className='status';$('answerInput').focus()};board.append(el)
+  }
+ }
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderPlayers(){
+ $('players').innerHTML=players.map((p,i)=>`<span class="player"><span class="avatar">${escapeHtml(p.slice(0,1).toUpperCase())}</span>${escapeHtml(p)}${i===0?' <span class="tag">HOST</span>':''}</span>`).join('');
+}
+function submit(){
+ let raw=$('answerInput').value.trim();if(!raw){$('status').textContent='Enter a player name first.';$('status').className='status bad';return}
+ if(selected===null){$('status').textContent='Select a square on the board first.';$('status').className='status bad';return}
+ let cell=cells[selected],r=rows[Math.floor(selected/size)],c=cols[selected%size];
+ if(cell.player){$('status').textContent='That square has already been claimed.';$('status').className='status bad';return}
+ let a=athletes.find(a=>[a.name,...a.aliases].some(n=>norm(n)===norm(raw)));
+ if(!a||!valid(a,r,c)){
+  $('status').textContent=a?`${a.name} doesn't match both ${labels[r]} and ${labels[c]} in this demo dataset.`:'Player not found in the demo dataset. Try a known sample player.';
+  $('status').className='status bad';activity.unshift(`✕ ${raw} — incorrect for ${labels[r]} + ${labels[c]}`);$('activity').textContent=activity.slice(0,4).join('  •  ');return
+ }
+ if(usedUnique&&claimedNames.has(a.name)){$('status').textContent=`${a.name} has already been used. Try a unique answer.`;$('status').className='status bad';return}
+ cell.player=a.name;cell.owner=players[turn%players.length];claimedNames.add(a.name);score++;turn++;selected=null;$('score').textContent=score;$('answerInput').value='';$('status').textContent=`Correct! ${a.name} matches both categories. Square claimed by ${cell.owner}.`;$('status').className='status good';
+ activity.unshift(`✓ ${a.name} claimed by ${cell.owner}`);$('activity').textContent=activity.slice(0,4).join('  •  ');renderBoard();checkWin();
+}
+function checkWin(){
+ const ownerAt=(r,c)=>cells[r*size+c].owner;
+ let needed=$('winCondition').value==='tic'?3:size;
+ if(needed>size)needed=size;
+ let lines=[];
+ for(let r=0;r<size;r++)for(let c=0;c<size;c++){
+  for(let [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){
+   let coords=[];for(let k=0;k<needed;k++){let rr=r+dr*k,cc=c+dc*k;if(rr<0||cc<0||rr>=size||cc>=size){coords=[];break}coords.push([rr,cc])}
+   if(coords.length===needed&&coords.every(([rr,cc])=>ownerAt(rr,cc)&&ownerAt(rr,cc)===ownerAt(r,c)))lines.push({owner:ownerAt(r,c),coords});
+  }
+ }
+ if(lines.length){$('status').textContent=`🏆 ${lines[0].owner} connected ${needed}! Reset the board for a rematch.`;$('status').className='status good';toast(`${lines[0].owner} wins!`)}
+}
+function invite(){let link=location.href.split('#')[0]+'#room='+$('roomCode').textContent; if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(link).then(()=>toast('Invite link copied!')).catch(()=>prompt('Copy invite link:',link))}else prompt('Copy invite link:',link)}
+$('generate').onclick=generate;$('submitAnswer').onclick=submit;$('answerInput').addEventListener('keydown',e=>{if(e.key==='Enter')submit()});
+$('startBtn').onclick=()=>{generate();$('builder').scrollIntoView({behavior:'smooth',block:'start'});toast('Your NFL grid is ready.')};
+$('copyTop').onclick=invite;$('copyCode').onclick=()=>{if(navigator.clipboard)navigator.clipboard.writeText($('roomCode').textContent).then(()=>toast('Room code copied'));else toast('Room code: '+$('roomCode').textContent)};
+$('addPlayer').onclick=()=>{let n=prompt('Demo player nickname:');if(n&&n.trim()){players.push(n.trim().slice(0,20));renderPlayers();toast(n.trim()+' joined the demo lobby.')}};
+$('reset').onclick=()=>{cells=Array.from({length:size*size},()=>({player:null,owner:null}));selected=null;score=0;claimedNames.clear();activity=[];turn=0;$('score').textContent='0';$('activity').textContent='Board reset. Ready for another round.';$('status').textContent='Choose a square, then enter a player who matches both categories.';$('status').className='status';renderBoard()};
+$('roomName').addEventListener('input',()=>{$('displayRoom').textContent=$('roomName').value||'Untitled Game'});
+$('nickname').addEventListener('change',()=>{players[0]=$('nickname').value.trim()||'Host';renderPlayers()});
+$('unique').addEventListener('change',e=>usedUnique=e.target.checked);
+$('gridSize').addEventListener('change',()=>{});
+generate();
+
+const lobbyScreen = document.getElementById("lobbyScreen");
+const lobbyNickname = document.getElementById("lobbyNickname");
+const accessCode = document.getElementById("accessCode");
+const lobbyMessage = document.getElementById("lobbyMessage");
+
+// Online room session, shared with everyone in the room through /api/rooms.
+const online = { code: "", playerId: "", isHost: false, timer: null, gridKey: "", known: new Set() };
+const seatKey = code => "gridiron:seat:" + code;
+
+// Read an invite code from #room=GRID24.
+// Also support ?room=GRID24 for compatibility.
+function readInviteCode() {
+  const hashParams = new URLSearchParams(
+    window.location.hash.slice(1)
+  );
+  const queryParams = new URLSearchParams(
+    window.location.search
+  );
+
+  return (
+    hashParams.get("room") ||
+    queryParams.get("room") ||
+    ""
+  ).toUpperCase().trim();
+}
+
+function openLobby() {
+  const code = readInviteCode();
+
+  accessCode.value = code;
+  lobbyNickname.value = $("nickname").value || "";
+
+  document.getElementById("lobbyTitle").textContent =
+    code ? "Join room " + code : "Join the lobby";
+
+  lobbyMessage.textContent = code
+    ? "You've been invited! Enter a nickname to join."
+    : "Enter a room code or create a new game.";
+
+  lobbyScreen.style.display = "flex";
+  (code ? lobbyNickname : accessCode).focus();
+}
+
+async function api(path, options = {}) {
+  const res = await fetch("/api/rooms" + path, {
+    ...options,
+    headers: { "Content-Type": "application/json" },
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(data.error || "Something went wrong. Try again."), { status: res.status });
+  return data;
+}
+
+function setLobbyBusy(busy) {
+  $("joinLobby").disabled = busy;
+  $("createLobby").disabled = busy;
+}
+
+function currentGrid() {
+  return { size, rows, cols };
+}
+
+// Show the host's grid on a guest's board whenever it changes.
+function applyGrid(grid) {
+  if (!grid || !Array.isArray(grid.rows) || !Array.isArray(grid.cols)) return;
+  const key = JSON.stringify(grid);
+  if (key === online.gridKey) return;
+  online.gridKey = key;
+  size = grid.size; rows = grid.rows; cols = grid.cols;
+  cells = Array.from({ length: size * size }, () => ({ player: null, owner: null }));
+  selected = null; score = 0; claimedNames = new Set(); turn = 0;
+  $("score").textContent = "0";
+  $("gridLabel").textContent = size + " × " + size;
+  $("gridSize").value = String(size);
+  renderBoard();
+}
+
+function applyRoom(room) {
+  const nicknames = room.players.map(p => p.nickname);
+  if (online.known.size) {
+    room.players
+      .filter(p => !online.known.has(p.id) && p.id !== online.playerId)
+      .forEach(p => {
+        toast(p.nickname + " joined the lobby.");
+        activity.unshift("👋 " + p.nickname + " joined the room");
+        $("activity").textContent = activity.slice(0, 4).join("  •  ");
+      });
+  }
+  online.known = new Set(room.players.map(p => p.id));
+  players = nicknames.length ? nicknames : players;
+  renderPlayers();
+  if (!online.isHost) {
+    $("displayRoom").textContent = room.name;
+    $("roomName").value = room.name;
+    applyGrid(room.grid);
+  }
+}
+
+async function poll() {
+  try {
+    const room = await api("/" + encodeURIComponent(online.code) + "?player=" + encodeURIComponent(online.playerId));
+    applyRoom(room);
+  } catch (err) {
+    if (err.status === 404) {
+      clearInterval(online.timer);
+      $("status").textContent = "This room no longer exists.";
+      $("status").className = "status bad";
+    }
+  }
+}
+
+function startPolling() {
+  clearInterval(online.timer);
+  online.timer = setInterval(poll, 2500);
+}
+
+// Host-only: push room name or grid changes so guests see them.
+let pushTimer = null;
+function pushRoom(update) {
+  if (!online.isHost || !online.playerId) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => {
+    api("/" + encodeURIComponent(online.code) + "/update", {
+      method: "POST",
+      body: { playerId: online.playerId, ...update }
+    }).catch(() => toast("Couldn't sync the room. Retrying on next change."));
+  }, 400);
+}
+
+function enterRoom(code, playerId, room) {
+  online.code = code;
+  online.playerId = playerId;
+  online.isHost = !!room.players.find(p => p.id === playerId && p.isHost);
+  online.known = new Set();
+  online.gridKey = "";
+  localStorage.setItem(seatKey(code), playerId);
+
+  const me = room.players.find(p => p.id === playerId);
+  $("nickname").value = me ? me.nickname : lobbyNickname.value.trim();
+  $("roomCode").textContent = code;
+  turn = 0;
+
+  // Keep the invite format already used by your site.
+  window.history.replaceState(
+    null,
+    "",
+    window.location.pathname +
+    window.location.search +
+    "#room=" + encodeURIComponent(code)
+  );
+
+  lobbyScreen.style.display = "none";
+  $("addPlayer").style.display = "none";
+  $("gameMode").textContent = online.isHost ? "HOST LOBBY · NFL" : "JOINED LOBBY · NFL";
+  $("generate").disabled = !online.isHost;
+  $("roomName").disabled = !online.isHost;
+  if (online.isHost) {
+    $("displayRoom").textContent = room.name;
+    $("roomName").value = room.name;
+    if (room.grid) applyGrid(room.grid);
+  }
+  applyRoom(room);
+  online.known = new Set(room.players.map(p => p.id));
+
+  $("status").textContent = online.isHost
+    ? "Your room is live. Share the invite link — players appear here as they join."
+    : "You joined " + room.name + ". The host controls the grid setup.";
+  $("status").className = "status good";
+  startPolling();
+}
+
+async function joinRoom() {
+  const nickname = lobbyNickname.value.trim();
+  const code = accessCode.value.trim().toUpperCase();
+
+  if (!nickname) {
+    lobbyMessage.textContent = "Please enter a nickname.";
+    lobbyNickname.focus();
+    return;
+  }
+
+  if (!code) {
+    lobbyMessage.textContent = "Please enter a room code.";
+    accessCode.focus();
+    return;
+  }
+
+  setLobbyBusy(true);
+  lobbyMessage.textContent = "Joining room " + code + "…";
+  try {
+    const data = await api("/" + encodeURIComponent(code) + "/join", {
+      method: "POST",
+      body: { nickname, playerId: localStorage.getItem(seatKey(code)) || undefined }
+    });
+    enterRoom(code, data.playerId, data.room);
+  } catch (err) {
+    lobbyMessage.textContent = err.message;
+  } finally {
+    setLobbyBusy(false);
+  }
+}
+
+async function createRoom() {
+  const nickname = lobbyNickname.value.trim();
+  if (!nickname) {
+    lobbyMessage.textContent = "Please enter a nickname.";
+    lobbyNickname.focus();
+    return;
+  }
+
+  setLobbyBusy(true);
+  lobbyMessage.textContent = "Creating your room…";
+  $("roomName").value = "GridLock Showdown";
+  $("nickname").value = nickname;
+  generate();
+  try {
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = "GRID" + Math.random().toString(36).slice(2, 6).toUpperCase();
+      try {
+        const data = await api("", {
+          method: "POST",
+          body: { code, nickname, name: $("roomName").value, grid: currentGrid() }
+        });
+        accessCode.value = code;
+        enterRoom(code, data.playerId, data.room);
+        return;
+      } catch (err) {
+        if (err.status !== 409) throw err;
+      }
+    }
+    throw new Error("Couldn't find a free room code. Try again.");
+  } catch (err) {
+    lobbyMessage.textContent = err.message;
+  } finally {
+    setLobbyBusy(false);
+  }
+}
+
+document.getElementById("joinLobby").onclick = joinRoom;
+document.getElementById("createLobby").onclick = createRoom;
+[lobbyNickname, accessCode].forEach(el => el.addEventListener("keydown", e => {
+  if (e.key === "Enter") joinRoom();
+}));
+
+// Share the host's grid and room name with everyone in the room.
+const localGenerate = generate;
+generate = function () {
+  localGenerate();
+  if (online.isHost) pushRoom({ grid: currentGrid() });
+};
+$("generate").onclick = generate;
+$("startBtn").onclick = () => {
+  if (online.code && !online.isHost) {
+    toast("Only the host can generate a new grid.");
+    return;
+  }
+  generate();
+  $("builder").scrollIntoView({ behavior: "smooth", block: "start" });
+  toast("Your NFL grid is ready.");
+};
+$("roomName").addEventListener("input", () => pushRoom({ name: $("roomName").value }));
+
+// Free the guest's seat right away when they close the tab.
+window.addEventListener("pagehide", () => {
+  if (online.code && online.playerId && !online.isHost) {
+    navigator.sendBeacon(
+      "/api/rooms/" + encodeURIComponent(online.code) + "/leave",
+      JSON.stringify({ playerId: online.playerId })
+    );
+  }
+});
+
+// Show the lobby before players interact with the game.
+openLobby();
+</script>
+</body>
+</html>
