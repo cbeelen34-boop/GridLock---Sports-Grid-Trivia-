@@ -76,8 +76,11 @@ button,input,select{font:inherit}button{cursor:pointer;border:0;font-weight:750;
     <div class="lobby-actions"><button class="primary" id="joinLobby">Join room</button><button class="secondary" id="createLobby">Create game</button></div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const athletes = [
+
+
 {name:"Tom Brady",aliases:["tom brady","brady"],mvp:true,first:false,alabama:false,patriots:true,packers:false,chiefs:false,sb:true,michigan:true,heisman:false,pro:true},
 {name:"Patrick Mahomes",aliases:["patrick mahomes","mahomes"],mvp:true,first:true,alabama:false,patriots:false,packers:false,chiefs:true,sb:true,michigan:false,heisman:false,pro:true},
 {name:"Aaron Rodgers",aliases:["aaron rodgers","rodgers"],mvp:true,first:true,alabama:false,patriots:false,packers:true,chiefs:false,sb:true,michigan:false,heisman:false,pro:true},
@@ -102,6 +105,15 @@ const labels={"MVP":"NFL MVP","First-round pick":"1st-round pick","Alabama":"Ala
 const props={"MVP":"mvp","First-round pick":"first","Alabama":"alabama","Patriots":"patriots","Packers":"packers","Chiefs":"chiefs","Super Bowl MVP":"sb","Michigan":"michigan","Heisman winner":"heisman","Pro Bowler":"pro"};
 let size=4, rows=[], cols=[], cells=[], selected=null, score=0, players=["Commissioner"], claimedNames=new Set(), activity=[], usedUnique=true, turn=0;
 const $=id=>document.getElementById(id);
+
+const SUPABASE_URL = "https://jprsmccklhftbnlfbbpg.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RVFCBQilD8t4Lsy6PBQq6A_4HQTL6zG";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
 function toast(s){$('toast').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2100)}
 function norm(s){return s.toLowerCase().replace(/[^a-z0-9]/g,'').replace(/\b(the|jr|sr|iii|iv)\b/g,'')}
 function valid(a,r,c){return !!(a[props[r]]&&a[props[c]])}
@@ -236,15 +248,174 @@ function openLobby() {
   (code ? lobbyNickname : accessCode).focus();
 }
 
+
 async function api(path, options = {}) {
-  const res = await fetch("/api/rooms" + path, {
-    ...options,
-    headers: { "Content-Type": "application/json" },
-    body: options.body ? JSON.stringify(options.body) : undefined
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw Object.assign(new Error(data.error || "Something went wrong. Try again."), { status: res.status });
-  return data;
+  const method = options.method || "GET";
+  const body = options.body || {};
+  const parts = path.split("?")[0].split("/").filter(Boolean);
+  const code = parts[0];
+  const action = parts[1];
+  const params = new URLSearchParams(path.split("?")[1] || "");
+
+  function fail(message, status = 400) {
+    throw Object.assign(new Error(message), { status });
+  }
+
+  async function loadRoom(roomCode) {
+    const { data: room, error } = await db
+      .from("game_rooms")
+      .select("*")
+      .eq("room_code", roomCode)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!room) fail("Room not found. Check the code and try again.", 404);
+
+    const { data: roomPlayers, error: playerError } = await db
+      .from("game_players")
+      .select("*")
+      .eq("room_code", roomCode)
+      .order("joined_at");
+
+    if (playerError) throw playerError;
+
+    const state = room.game_state || {};
+
+    return {
+      code: room.room_code,
+      name: state.name || "GridLock Showdown",
+      grid: state.grid || null,
+      players: (roomPlayers || []).map(p => ({
+        id: p.player_id,
+        nickname: p.nickname,
+        isHost: p.is_host
+      }))
+    };
+  }
+
+  if (method === "POST" && !code) {
+    const playerId = crypto.randomUUID();
+    const gameState = {
+      name: body.name || "GridLock Showdown",
+      grid: body.grid || null
+    };
+
+    const { error } = await db.from("game_rooms").insert({
+      room_code: body.code,
+      host_player_id: playerId,
+      status: "waiting",
+      game_state: gameState
+    });
+
+    if (error) {
+      if (error.code === "23505") fail("That room code is already taken.", 409);
+      throw error;
+    }
+
+    const { error: joinError } = await db.from("game_players").insert({
+      room_code: body.code,
+      player_id: playerId,
+      nickname: body.nickname,
+      is_host: true
+    });
+
+    if (joinError) throw joinError;
+
+    return {
+      playerId,
+      room: await loadRoom(body.code)
+    };
+  }
+
+  if (!code) fail("Room code is missing.");
+
+  if (method === "POST" && action === "join") {
+    const { data: room, error } = await db
+      .from("game_rooms")
+      .select("room_code,host_player_id")
+      .eq("room_code", code)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!room) fail("That room code was not found.", 404);
+
+    const playerId = body.playerId || crypto.randomUUID();
+
+    const { error: joinError } = await db
+      .from("game_players")
+      .upsert({
+        room_code: code,
+        player_id: playerId,
+        nickname: body.nickname,
+        is_host: room.host_player_id === playerId,
+        last_seen: new Date().toISOString()
+      }, { onConflict: "room_code,player_id" });
+
+    if (joinError) throw joinError;
+
+    return {
+      playerId,
+      room: await loadRoom(code)
+    };
+  }
+
+  if (method === "GET") {
+    const playerId = params.get("player");
+    const room = await loadRoom(code);
+
+    if (playerId) {
+      await db.from("game_players")
+        .update({ last_seen: new Date().toISOString() })
+        .eq("room_code", code)
+        .eq("player_id", playerId);
+    }
+
+    return room;
+  }
+
+  if (method === "POST" && action === "update") {
+    const { data: room, error } = await db
+      .from("game_rooms")
+      .select("*")
+      .eq("room_code", code)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!room) fail("Room not found.", 404);
+    if (room.host_player_id !== body.playerId) {
+      fail("Only the host can update the room.", 403);
+    }
+
+    const oldState = room.game_state || {};
+    const newState = {
+      ...oldState,
+      ...(body.name !== undefined ? { name: body.name } : {}),
+      ...(body.grid !== undefined ? { grid: body.grid } : {})
+    };
+
+    const { error: updateError } = await db
+      .from("game_rooms")
+      .update({
+        game_state: newState,
+        updated_at: new Date().toISOString()
+      })
+      .eq("room_code", code);
+
+    if (updateError) throw updateError;
+    return { room: await loadRoom(code) };
+  }
+
+  if (method === "POST" && action === "leave") {
+    const { error } = await db.from("game_players")
+      .delete()
+      .eq("room_code", code)
+      .eq("player_id", body.playerId);
+
+    if (error) throw error;
+    return { success: true };
+  }
+
+  fail("Unsupported room action.");
 }
 
 function setLobbyBusy(busy) {
@@ -456,15 +627,6 @@ $("startBtn").onclick = () => {
 };
 $("roomName").addEventListener("input", () => pushRoom({ name: $("roomName").value }));
 
-// Free the guest's seat right away when they close the tab.
-window.addEventListener("pagehide", () => {
-  if (online.code && online.playerId && !online.isHost) {
-    navigator.sendBeacon(
-      "/api/rooms/" + encodeURIComponent(online.code) + "/leave",
-      JSON.stringify({ playerId: online.playerId })
-    );
-  }
-});
 
 // Show the lobby before players interact with the game.
 openLobby();
