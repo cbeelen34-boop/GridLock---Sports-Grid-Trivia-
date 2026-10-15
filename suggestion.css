@@ -1,0 +1,44 @@
+
+/* NFL Player Suggestion Box */
+
+.suggestion-wrapper {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.suggestion-box {
+    display: none;
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+
+    background: #172432;
+    border: 1px solid #304355;
+    border-radius: 10px;
+
+    max-height: 250px;
+    overflow-y: auto;
+
+    z-index: 100;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.suggestion {
+    padding: 11px 14px;
+    color: #edf4f8;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.suggestion:hover,
+.suggestion.active {
+    background: #233d27;
+    color: #b8f36b;
+}
+
+.suggestion:not(:last-child) {
+    border-bottom: 1px solid #2a3b4c;
+}
